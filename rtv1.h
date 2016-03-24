@@ -6,7 +6,7 @@
 /*   By: jbahus <jbahus@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/01/22 12:27:43 by jbahus            #+#    #+#             */
-/*   Updated: 2016/01/29 16:02:02 by jbahus           ###   ########.fr       */
+/*   Updated: 2016/03/04 17:14:45 by jbahus           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,12 @@ typedef struct		s_sphere
 	int				material;
 }					t_sphere;
 
+typedef struct		s_material
+{
+	colour			diffuse;
+	float			reflection;
+}					t_material;
+
 typedef struct		s_env
 {
 	void			*mlx;
@@ -69,16 +75,14 @@ typedef struct		s_env
 	int				endian;
 	char			*data;
 	int				color;
-	int				x;
-	int				y;
-	//t_sphere		s;
 	t_ray			ray;
 	colour			colour;
 	light			light;
 	t_sphere		spheres;
+	t_material		mat;
 }					t_env;
 
-//int		ft_test(t_env *e);
-void	ft_pixel_put_img(t_env *e, int i, int j);
+void	ft_pixel_put_img(t_env *e);
+void	ft_init(t_env *e);
 
 #endif

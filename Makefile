@@ -6,12 +6,12 @@
 #    By: jbahus <jbahus@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2015/12/18 18:31:25 by jbahus            #+#    #+#              #
-#    Updated: 2016/01/29 14:57:56 by jbahus           ###   ########.fr        #
+#    Updated: 2016/03/04 17:05:08 by jbahus           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = RTv1
-SRC = main.c ft_pixel_put_img.c
+SRC = main.c ft_pixel_put_img.c ft_init.c
 HDR = rtv1.h
 LIB = -lft -L libft -lmlx -Lminilibx_macos -framework OpenGL -framework AppKit
 OBJ = $(SRC:%.c=obj/%.o)

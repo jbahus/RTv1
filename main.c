@@ -6,7 +6,7 @@
 /*   By: jbahus <jbahus@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/12/18 18:29:23 by jbahus            #+#    #+#             */
-/*   Updated: 2016/01/29 15:09:56 by jbahus           ###   ########.fr       */
+/*   Updated: 2016/03/04 17:44:42 by jbahus           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,22 +41,22 @@ t_vec	vector_sub(t_vec v1, t_vec v2)
 {
 	t_vec	result;
 
-	result.x = v1.x * v2.x;
-	result.y = v1.y * v2.y;
-	result.z = v1.z * v2.z;
+	result.x = v1.x - v2.x;
+	result.y = v1.y - v2.y;
+	result.z = v1.z - v2.z;
 	return (result);
 }
 
-int		ft_test(t_env *e)
+int		ft_test(t_env *e, float *t)
 {
 	float	a;
 	float	b;
 	float	c;
 	float	discr;
 	t_vec	dist;
-	//float	sqrtdiscr;
-	//float	t0;
-	//float	t1;
+	float	sqrtdiscr;
+	float	t0;
+	float	t1;
 	int		ret;
 
 	ret = 0;
@@ -70,7 +70,7 @@ int		ft_test(t_env *e)
 	else
 	{
 		ret = 1;
-		/*sqrtdiscr = sqrtf(discr);
+		sqrtdiscr = sqrtf(discr);
 		t0 = (-b + sqrtdiscr) / 2;
 		t1 = (-b - sqrtdiscr) / 2;
 		if (t0 > t1)
@@ -81,52 +81,44 @@ int		ft_test(t_env *e)
 			ret = 1;
 		}
 		else
-			ret = 0;*/
+			ret = 0;
 	}
 	return (ret);
 }
 
 void	ft_do_it(t_env *e)
 {
-	int		i;
-	int		j;
-	int		lvl;
+	int		hit;
+	colour	col;
 	float	coef;
-	//float	t;
+	float	t;
+	int		lvl;
+	int		current_s;
 
-	e->spheres.pos.x = 200;
-	e->spheres.pos.y = 300;
-	e->spheres.pos.z = 0;
-	e->spheres.radius = 100;
-	e->spheres.material = 0;
-	i = 0;
-	while (i < L)
+	col.red = 0;
+	col.green = 0;
+	col blue = 0;
+	e->ray.start.y = 0;
+	while (e->ray.start.y < L)
 	{
-		j = 0;
-		while (j < H)
+		e->ray.start.x = 0;
+		while (e->ray.start.x < H)
 		{
-			e->colour.red = 0;
-			e->colour.green = 0;
-			e->colour.blue = 0;
-			lvl = 0;
-			coef = 1.0;
-			e->ray.start.x = j;
-			e->ray.start.y = i;
-			e->ray.dir.x = 0;
-			e->ray.dir.y = 0;
-			e->ray.dir.z = 1;
-			ft_test(e);
-			e->data[j * e->sizeline + i * (e->bpp / 8) + 0] = (unsigned char)fmin(e->colour.red * 255.0f, 255.0f);
-			e->data[j * e->sizeline + i * (e->bpp / 8) + 1] = (unsigned char)fmin(e->colour.green * 255.0f, 255.0f);
-			e->data[j * e->sizeline + i * (e->bpp / 8) + 2] = (unsigned char)fmin(e->colour.blue *255.0f, 255.0f);
-			j++;
+			t = 20000.0f;
+			current_s = 0;
+			
+			hit = ft_test(e);
+			if (hit)
+				ft_pixel_put_img(e);
+			e->ray.start.x++;
 		}
-		i++;
+		e->ray.start.y++;
 	}
 }
 
 int		expose_hook(t_env *e)
 {
+	ft_init(e);
 	ft_do_it(e);
 	mlx_clear_window(e->mlx, e->win);
 	mlx_put_image_to_window(e->mlx, e->win, e->img, 0, 0);
