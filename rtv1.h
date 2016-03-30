@@ -6,7 +6,7 @@
 /*   By: jbahus <jbahus@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/01/22 12:27:43 by jbahus            #+#    #+#             */
-/*   Updated: 2016/03/04 17:14:45 by jbahus           ###   ########.fr       */
+/*   Updated: 2016/03/27 07:20:51 by jbahus           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,55 +17,44 @@
 # include "minilibx_macos/mlx.h"
 # include <math.h>
 # define H 1000
-# define L 1500
-# define FOV 30
+# define W 1500
+# define OBJ_MAX 10
+# define FOV 90
 
 typedef struct		s_vec
 {
-	float			x;
-	float			y;
-	float			z;
+	double			x;
+	double			y;
+	double			z;
 }					t_vec;
 
-typedef struct
+typedef struct		s_color
 {
-	float			red;
-	float			green;
-	float			blue;
-}					colour;
+	double			red;
+	double			green;
+	double			blue;
+}					t_color;
 
-typedef struct
+typedef struct		s_light
 {
-	colour			intensity;
-	t_vec			pos;
-}					material;
-
-typedef struct
-{
-	t_vec			pos;
-	colour			intensity;
-}					light;
-
-typedef struct		s_ray
-{
-	t_vec			start;
-	t_vec			dir;
-}					t_ray;
+	t_vec			o;
+	t_color			i;
+}					t_light;
 
 typedef struct		s_sphere
 {
-	t_vec			pos;
-	float			radius;
-	int				material;
+	t_vec			position;
+	double			radius;
+	t_color			color;
 }					t_sphere;
 
-typedef struct		s_material
+typedef struct		s_ray
 {
-	colour			diffuse;
-	float			reflection;
-}					t_material;
+	t_vec			o;
+	t_vec			dir;
+}					t_ray;
 
-typedef struct		s_env
+typedef struct		s_mlx
 {
 	void			*mlx;
 	void			*win;
@@ -74,15 +63,21 @@ typedef struct		s_env
 	int				sizeline;
 	int				endian;
 	char			*data;
-	int				color;
-	t_ray			ray;
-	colour			colour;
-	light			light;
-	t_sphere		spheres;
-	t_material		mat;
+}					t_mlx;
+
+typedef struct		s_env
+{
+	t_mlx			mlx;
+	int				num_obj;
+	t_ray			camera;
+	t_sphere		sphere;
+	t_light			light;
+	t_color			pix_color;
+	double			d;
+	double			t;
 }					t_env;
 
-void	ft_pixel_put_img(t_env *e);
-void	ft_init(t_env *e);
+void	ft_pixel_put_img(int i, int j, t_env *e);
+void	draw_scene(t_env *e);
 
 #endif
