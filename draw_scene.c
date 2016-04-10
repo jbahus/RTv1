@@ -6,7 +6,7 @@
 /*   By: jbahus <jbahus@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/26 21:58:07 by jbahus            #+#    #+#             */
-/*   Updated: 2016/03/30 08:42:54 by jbahus           ###   ########.fr       */
+/*   Updated: 2016/04/10 06:17:42 by jbahus           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ t_vec	vector_cross(t_vec *a, t_vec *b)
 	return (ret);
 }
 
-/*t_vec	vector_add(t_vec *a, t_vec *b)
+t_vec	vector_add(t_vec *a, t_vec *b)
 {
 	t_vec	ret;
 
@@ -58,7 +58,7 @@ t_vec	vector_cross(t_vec *a, t_vec *b)
 	ret.y = a->y + b->y;
 	ret.z =	a->z + b->z;
 	return (ret);
-}*/
+}
 
 t_vec	vector_scale(double c, t_vec *vec)
 {
@@ -70,7 +70,29 @@ t_vec	vector_scale(double c, t_vec *vec)
 	return (ret);
 }
 
-int		intersect_sphere(t_sphere *sphere, t_ray *ray, double *t)
+int		intersect_plane(t_obj *plane, t_ray *ray, double *t)
+{
+	double	t0;
+	t_vec	tmp;
+	t_vec	n;
+	double	denom;
+
+	n = vector_normalize(&plane->o);
+	denom = vector_dot(&n, &ray->o);
+	if (denom > 0.01)
+	{
+		tmp = vector_sub(&ray->dir, &plane->o);
+		t0 = vector_dot(&tmp, &n) / denom;
+		if (t0 < *t)
+		{
+			*t = t0;
+			return (1);
+		}
+	}
+	return (0);
+}
+
+int		intersect_sphere(t_obj *obj, t_ray *ray, double *t)
 {
 	double	a;
 	double	b;
@@ -81,9 +103,9 @@ int		intersect_sphere(t_sphere *sphere, t_ray *ray, double *t)
 	t_vec	dist;
 
 	a = vector_dot(&ray->dir, &ray->dir);
-	dist = vector_sub(&sphere->position, &ray->o);
+	dist = vector_sub(&obj->o, &ray->o);
 	b = 2 * vector_dot(&ray->dir, &dist);
-	c = vector_dot(&dist, &dist) - (sphere->radius * sphere->radius);
+	c = vector_dot(&dist, &dist) - (obj->r * obj->r);
 	discr = b * b - 4 * a * c;
 	if (discr < 0)
 		return (0);
@@ -108,33 +130,42 @@ void	draw_scene(t_env *e)
 {
 	int		j;
 	int		i;
+	int		x;
 	// t_vec	new_start;
 	//t_vec	scale;
 	t_vec	n;
 	t_vec 	inter;
 	t_vec	light_ray;
-	// double	dist;
+	int		current_obj;
+	double	t0;
 	double	il;
 	// double	lambert;
 
 	j = 0;
-	e->sphere.position.x = 750;
-	e->sphere.position.y = 500;
-	e->sphere.position.z = 200;
-	e->sphere.radius = 100;
+	e->obj[0].o.x = 750;
+	e->obj[0].o.y = 500;
+	e->obj[0].o.z = 0;
+	e->obj[0].r = 100;
+	e->obj[0].color.red = 1.0;
+	e->obj[0].color.green = 0.1;
+	e->obj[0].color.blue = 0.1;
+	e->obj[1].o.x = 200;
+	e->obj[1].o.y = 300;
+	e->obj[1].o.z = 100;
+	e->obj[1].r = 50;
+	e->obj[1].color.red = 0.1;
+	e->obj[1].color.green = 1.0;
+	e->obj[1].color.blue = 0.1;
 	e->camera.dir.x = 0;
 	e->camera.dir.y = 0;
 	e->camera.dir.z = 1;
 	e->camera.o.z = -100;
-	e->light.i.red = 255;
-	e->light.i.green = 255;
-	e->light.i.blue = 255;
+	e->light.i.red = 1;
+	e->light.i.green = 1;
+	e->light.i.blue = 1;
 	e->light.o.x = 0;
 	e->light.o.y = 0;
-	e->light.o.z = -100;
-	e->sphere.color.red = 255;
-	e->sphere.color.green = 0;
-	e->sphere.color.blue = 0;
+	e->light.o.z = 0;
 	while (j < H)
 	{
 		i = 0;
@@ -145,38 +176,54 @@ void	draw_scene(t_env *e)
 			e->pix_color.blue = 0;
 			e->camera.o.y = j;
 			e->camera.o.x = i;
-			// coef = 1.0;
-			// while (coef > 0.0f)
-			// {
-				e->t = 5000;
-				if (intersect_sphere(&e->sphere, &e->camera, &e->t))
+			e->t = 5000;
+			t0 = 5000;
+			x = 0;
+			current_obj = -1;
+			//if (intersect_sphere(&e->obj, &e->camera, &e->t))
+			//{
+			while (x < 2)
+			{
+				if (intersect_sphere(&e->obj[x], &e->camera, &t0))
 				{
-					// printf("%f\n", e->t);
-					inter = vector_scale(e->t, &e->camera.o);
-					light_ray = vector_sub(&inter, &e->light.o);
-					n = vector_sub(&inter, &e->sphere.position);
-					n = vector_normalize(&n);
-					light_ray = vector_normalize(&light_ray);
-					il = vector_dot(&light_ray, &n);
-					if (il <= 0.0)
-						il = 1;
-					il = acos(il) * 40.7436609389;
-					il *= 7;
-					// printf("%f\n", (il * 180 / M_PI));
-					// il = ((il * 180) / (2 * M_PI));
-					e->pix_color.red = il * (e->sphere.color.red + e->light.i.red);
-					e->pix_color.green = il * (e->sphere.color.green + e->light.i.green);
-					e->pix_color.blue = il * (e->sphere.color.blue + e->light.i.blue);
-					printf("%f\n", e->pix_color.red);
-					printf("%f\n", e->pix_color.green);
-					printf("%f\n", e->pix_color.blue);
+					if (t0 < e->t)
+					{
+						e->t = t0;
+						current_obj = x;
+					}
 				}
-				// coef *= 0.2;
-				// e->camera.o = new_start;
-				// reflect = 2.0f * vector_dot(&e->camera.dir, &n);
-				// temp = vector_scale(reflect, &n);
-				// e->camera.dir = vector_sub(&e->camera.dir, &temp);
-			// }
+				x++;
+			}
+			if (current_obj != -1)
+			{
+				inter = vector_scale(e->t, &e->camera.dir);
+				inter = vector_add(&inter, &e->camera.o);
+				light_ray = vector_sub(&inter, &e->light.o);
+				n = vector_sub(&inter, &e->obj[current_obj].o);
+				n = vector_normalize(&n);
+				light_ray = vector_normalize(&light_ray);
+				il = vector_dot(&light_ray, &n);
+			//	if (il <= 0.0)
+					//il = 1;
+				il = acos(il) * 0.3; //* 40.7436609389;
+				// il *= 3.5;
+				// printf("%f\n", (il * 180 / M_PI));
+				// il = ((il * 180) / (2 * M_PI));
+				printf("%f\n", il);
+				e->pix_color.red = il * (e->obj[current_obj].color.red * e->light.i.red) * 255;
+				e->pix_color.green = il * (e->obj[current_obj].color.green * e->light.i.green) * 255;
+				e->pix_color.blue = il * (e->obj[current_obj].color.blue * e->light.i.blue) * 255;
+				// printf("%f\n", e->pix_color.red);
+				// printf("%f\n", e->pix_color.green);
+				// printf("%f\n", e->pix_color.blue);
+			}
+			//}
+			// coef *= 0.2;
+			// e->camera.o = new_start;
+			// reflect = 2.0f * vector_dot(&e->camera.dir, &n);
+			// temp = vector_scale(reflect, &n);
+			// e->camera.dir = vector_sub(&e->camera.dir, &temp);
+		// }
 			ft_pixel_put_img(i, j, e);
 			i++;
 		}

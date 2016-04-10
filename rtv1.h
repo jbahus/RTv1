@@ -6,7 +6,7 @@
 /*   By: jbahus <jbahus@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/01/22 12:27:43 by jbahus            #+#    #+#             */
-/*   Updated: 2016/03/27 07:20:51 by jbahus           ###   ########.fr       */
+/*   Updated: 2016/04/10 06:14:48 by jbahus           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,13 @@ typedef struct		s_light
 	t_color			i;
 }					t_light;
 
-typedef struct		s_sphere
+typedef struct		s_obj
 {
-	t_vec			position;
-	double			radius;
+	t_vec			o;
+	double			r;
 	t_color			color;
-}					t_sphere;
+	struct s_obj	*next;
+}					t_obj;
 
 typedef struct		s_ray
 {
@@ -70,7 +71,7 @@ typedef struct		s_env
 	t_mlx			mlx;
 	int				num_obj;
 	t_ray			camera;
-	t_sphere		sphere;
+	t_obj			obj[OBJ_MAX];
 	t_light			light;
 	t_color			pix_color;
 	double			d;
